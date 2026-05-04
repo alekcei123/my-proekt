@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const reloadBtn = document.querySelector('#reload-tariffs');
   if (reloadBtn) {
     reloadBtn.addEventListener('click', async function() {
-      // Добавляем состояние загрузки
+      
       this.disabled = true;
       const originalText = this.textContent;
       this.textContent = 'Обновление...';
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         await loadTariffs();
       } finally {
-        // Восстанавливаем исходное состояние
+        
         setTimeout(() => {
           this.disabled = false;
           this.textContent = originalText;
