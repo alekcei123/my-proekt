@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.querySelector('.close');
   const validationMsg = document.getElementById('validationMsg');
 
-  // Функция расчёта возраста
+  
   function calculateAge(birthDate) {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return age;
   }
 
-  // Проверка возраста с alert для ошибок
+  
   function checkAgeWithAlert() {
     const birthDateStr = birthdateInput.value;
 
@@ -50,14 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Показ модального окна при загрузке, если возраст не подтверждён
+  
   function showAgeModal() {
     if (!localStorage.getItem('ageVerified')) {
       modal.style.display = 'block';
     }
   }
 
-  // Обработчики событий
+  
   checkAgeBtn.addEventListener('click', checkAgeWithAlert);
 
   exitBtn.addEventListener('click', () => {
@@ -69,13 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.style.display = 'none';
   });
 
-  // Закрытие по клику вне окна
+  
   window.addEventListener('click', (e) => {
     if (e.target === modal) {
       modal.style.display = 'none';
     }
   });
 
-  // Инициализация
+  
   showAgeModal();
 });
