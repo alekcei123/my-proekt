@@ -12,8 +12,8 @@ html {
 
 body {
   font-family: 'Times New Roman', Times, serif, 'Nimbus Roman No9 L';
-  color: #503020; /* Тёмно‑коричневый с оранжевым подтоном */
-  background-color: #fef8f5; /* Лёгкий персиковый оттенок */
+  color: #503020; 
+  background-color: 
   line-height: 2.1;
   overflow-x: hidden;
 }
@@ -26,7 +26,7 @@ body {
 
 .photo-card {
   width: 300px;
-  background: #e77a6b; /* Коралловый — основной акцент */
+  background: #e77a6b;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -45,7 +45,7 @@ body {
 .photo-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   transform: translateY(-4px);
-  background: #d45a4a; /* Тёплый акцент — при наведении */
+  background: #d45a4a;
 }
 
 
@@ -57,7 +57,7 @@ body {
 .photo-card p,
 .photo-card h3 {
   margin: 10px 15px;
-  color: #fff5f0; /* Светлый текст для карточек */
+  color: #fff5f0; 
 }
 
   .main-header{
@@ -69,7 +69,7 @@ body {
 .main-header.fixed {
   position: fixed;
   top: 0;
-  background: rgba(231, 122, 107, 0.9); /* Коралловый полупрозрачный */
+  background: rgba(231, 122, 107, 0.9); 
   backdrop-filter: blur(15px);
   padding: 15px 0;
   box-shadow: 0 0 10px rgba(80, 48, 32, 0.3);
@@ -104,7 +104,7 @@ body {
 
 .nav-link {
   text-decoration: none;
-  color: #d45a4a; /* Тёплый акцент для ссылок */
+  color: #d45a4a;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -121,13 +121,13 @@ body {
   left: 0;
   width: 0;
   height: 1px;
-  background-color: #c05040; /* Цвет линии — чуть темнее */
+  background-color: #c05040; 
   transition: width 0.3s ease-in-out;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: #503020; /* Тёмный оттенок при наведении/активе */
+  color: #503020; 
 }
 
 .nav-link:hover::after,
@@ -138,15 +138,15 @@ body {
 
 
 
-/* Заголовки и текст */
+
 h1, h2, p {
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   font-size: medium;
   font-weight: 500;
   padding: 10px;
   margin: 10px;
-  background-color: #e77a6b; /* Коралловый фон для заголовков */
-  color: #fff5f0; /* Светлый текст */
+  background-color: #e77a6b; 
+  color: #fff5f0;
   border-radius: 20px;
   text-align: center;
 }
@@ -210,7 +210,7 @@ h1, h2, p {
 .footer-brand .logo {
   font-size: 24px;
   font-weight: bold;
-  color: #e77a6b; /* Коралловый логотип в футере */
+  color: #e77a6b
 }
 
 
@@ -219,19 +219,19 @@ h1, h2, p {
 .footer-social h4 {
   font-size: 16px;
   margin-bottom: 10px;
-  color: #d45a4a; /* Тёплый акцент для подзаголовков */
+  color: #d45a4a; 
 }
 
 
 .footer-contacts p {
-  color: #fff5f0; /* Светлый текст контактов */
+  color: #fff5f0; 
 }
 
 
 .footer-nav a,
 .footer-contacts a,
 .footer-social a {
-  color: #fff5f0; /* Светлый цвет ссылок */
+  color: #fff5f0;
   text-decoration: none;
   display: block;
   margin: 5px 0;
@@ -243,19 +243,19 @@ h1, h2, p {
 .footer-nav a:hover,
 .footer-contacts a:hover,
 .footer-social a:hover {
-  color: #f8e5e0; /* Ещё светлее при наведении */
+  color: #f8e5e0; 
 }
 
 .footer-bottom {
   text-align: center;
   padding-top: 20px;
-  border-top: 1px solid #d45a4a; /* Линия — тёплый акцент */
+  border-top: 1px solid #d45a4a; 
   font-size: 12px;
-  color: #fff5f0; /* Светлый текст */
+  color: #fff5f0;
 }
 
 .footer-bottom a {
-  color: #f8e5e0; /* Чуть светлее для ссылок в футере */
+  color: #f8e5e0; 
   margin: 0 10px;
   text-decoration: none;
 }
@@ -273,7 +273,7 @@ label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #d45a4a; /* Тёплый акцент для меток */
+  color: #d45a4a; 
 }
 
 
@@ -282,14 +282,13 @@ input[type="date"],
 select {
   width: 100%;
   padding: 12px 15px;
-  border: 2px solid #f8e5e0; /* Светлая граница */
-  border-radius: 8px;
+  border: 2px solid #f8e5e0; 
   font-size: 16px;}
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #e77a6b; /* Коралловый при фокусе */
+  border-color: #e77a6b;
   box-shadow: 0 0 0 3px rgba(231, 122, 107, 0.2);
 }
 
@@ -301,22 +300,22 @@ select:focus {
 
 .checkbox-group input {
   margin-right: 10px;
-  accent-color: #e77a6b; /* Коралловый цвет для чекбокса */
+  accent-color: #e77a6b; 
 }
 
 .checkbox-group label {
   font-size: 14px;
-  color: #d45a4a; /* Тёплый акцент для текста метки */
+  color: #d45a4a; 
 }
 
 .checkbox-group a {
-  color: #e77a6b; /* Коралловый для ссылок в группе */
-  text-decoration: none;
+  color: #e77a6b; 
+  text-decoration: none
   transition: color 0.3s;
 }
 
 .checkbox-group a:hover {
-  color: #c05040; /* Темнее при наведении */
+  color: #c05040;
 }
 
 
@@ -663,7 +662,7 @@ select:focus {
 }
 
 .gallery-item {
-  flex: 0 0 120px; /* Фиксированная ширина элемента */
+  flex: 0 0 120px; 
 }
 
 .gallery-item img {
@@ -704,12 +703,9 @@ select:focus {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-/* Стили для модального окна */
-/* Модальное окно — центрирование через Flexbox */
+  
 .gallery-modal {
-  display: none; /* Изначально скрыто */
+  display: none; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -722,7 +718,6 @@ select:focus {
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-/* Изображение внутри модального окна */
 .modal-content {
   max-width: 90%;
   max-height: 90%;
@@ -730,7 +725,7 @@ select:focus {
   animation: fadeIn 0.3s;
 }
 
-/* Подпись под изображением */
+
 .modal-caption {
   color: white;
   text-align: center;
@@ -738,7 +733,7 @@ select:focus {
   font-family: Arial, sans-serif;
 }
 
-/* Крестик для закрытия */
+
 .modal-close {
   position: absolute;
   top: 20px;
@@ -750,7 +745,7 @@ select:focus {
   z-index: 1001;
 }
 
-/* Кнопки навигации */
+
 .modal-prev, .modal-next {
   position: absolute;
   top: 50%;
@@ -766,7 +761,7 @@ select:focus {
 .modal-prev { left: 15px; }
 .modal-next { right: 15px; }
 
-/* Анимация появления */
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
