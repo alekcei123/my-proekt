@@ -356,7 +356,7 @@ select:focus {
   background-color: #c03030; 
 }
 
-/* Основная кнопка выбора тарифа */
+
 .select-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -372,20 +372,20 @@ select:focus {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Эффект при наведении */
+
 .select-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-/* Эффект при нажатии */
+
 .select-btn:active {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Кнопка бесплатного тарифа — особый стиль */
+
 .free .select-btn {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
@@ -432,7 +432,7 @@ select:focus {
   60%, 100% { content: ' Загрузка...'; }
 }
 
-/* Визуальная обратная связь при выборе */
+
 .select-btn.selected {
   background: #c45724 !important;
   box-shadow: 0 0 0 3px rgba(180, 62, 33, 0.3);
