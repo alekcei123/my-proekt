@@ -15,7 +15,7 @@ async function loadTariffs() {
     const tariffs = await response.json();
     console.log("Что получили после .json():", tariffs);
 
-    // Очищаем контейнер и собираем HTML в одну строку
+    
     container.innerHTML = "";
     let tariffsHTML = "";
 
@@ -23,7 +23,7 @@ async function loadTariffs() {
       tariffsHTML = "<p>Тарифы не найдены</p>";
     } else {
       tariffs.forEach((tariff) => {
-        // Форматируем список функций
+        
         const featuresHTML = tariff.features
           .map(feature => `<li>${feature}</li>`)
           .join('');
@@ -50,7 +50,7 @@ async function loadTariffs() {
 
     container.innerHTML = tariffsHTML;
 
-    // Добавляем обработчики кликов к кнопкам тарифов
+    
     document.querySelectorAll('.select-btn').forEach(button => {
       button.addEventListener('click', function() {
         const tariffId = this.getAttribute('data-id');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateClock();
   loadTariffs();
 
-  // Обработчик для кнопки обновления тарифов с визуальной обратной связью
+  
   const reloadBtn = document.querySelector('#reload-tariffs');
   if (reloadBtn) {
     reloadBtn.addEventListener('click', async function() {
@@ -96,10 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function selectTariff(tariffId) {
   console.log('Выбран тариф с ID:', tariffId);
   alert(`Выбран тариф с ID: ${tariffId}`);
-  // Дополните логику: сохранение в localStorage, отправка на сервер и т. д.
+  
 }
-
-// Часы
 function updateClock() {
   const clock = document.querySelector("#clock");
 
