@@ -8,7 +8,7 @@ const QuestionnairePage = () => {
     interests: '',
     about: '',
     gender: 'other',
-    birth_date: '',          // ✅ новое поле
+    birth_date: '',         
   });
   const [status, setStatus] = useState(null);
   const [userId, setUserId] = useState(null);
