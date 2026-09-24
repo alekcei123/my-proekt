@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import LikeButton from './LikeButton'; // ✅ импорт компонента лайка
+import LikeButton from './LikeButton';
 
 const getAgeText = (age) => {
   if (!age) return 'возраст не указан';
@@ -17,7 +17,6 @@ const UserCard = ({ user, commonInterests }) => {
   const interests = user.interests || (commonInterests && commonInterests[user.id]) || [];
   const imageSrc = user.photo ? user.photo : null;
 
-  // Получаем текущего пользователя из localStorage
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const currentUserId = currentUser?.id || null;
 
@@ -44,14 +43,18 @@ const UserCard = ({ user, commonInterests }) => {
         <img 
           src={imageSrc || placeholderSvg}
           alt={user.username || 'Профиль'}
+          loading="lazy" 
+          decoding="async"
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
+            objectPosition: 'center top',
             transition: 'transform 0.3s ease',
             display: 'block'
           }}
           onError={(e) => {
+            e.target.onerror = null;
             e.target.src = placeholderSvg;
           }}
           onMouseOver={(e) => {
@@ -114,7 +117,6 @@ const UserCard = ({ user, commonInterests }) => {
           </div>
         )}
 
-        {/* ===== БЛОК КНОПОК ===== */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -129,13 +131,43 @@ const UserCard = ({ user, commonInterests }) => {
               onLike={(data) => {
                 if (data.match) {
                   alert('💞 Взаимная симпатия! Перейдите в чат.');
-                  // Можно сразу перенаправить в чат: window.location.href = `/chat/${user.id}`;
                 }
               }}
             />
           )}
 
-          {/* Кнопка перехода в профиль */}
+          {currentUserId && currentUserId !== user.id && (
+            <Link 
+              to={`/chat/${user.id}`} 
+              style={{ textDecoration: 'none', display: 'block' }}
+            >
+              <button style={{
+                width: '100%',
+                padding: '10px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '14px',
+                transition: 'all 0.2s',
+                boxShadow: '0 2px 4px rgba(40, 167, 69, 0.3)'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#218838';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#28a745';
+                e.target.style.transform = 'translateY(0)';
+              }}>
+                💬 Написать
+              </button>
+            </Link>
+          )}
+
+          
           <Link to={`/user/${user.id}`} style={{ textDecoration: 'none', display: 'block' }}>
             <button style={{
               width: '100%',

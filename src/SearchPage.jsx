@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './SearchPage.css'; // стили ниже
+import './SearchPage.css';
+
+
+const PLACEHOLDER_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><rect width="50" height="50" fill="%23e2e8f0"/><circle cx="25" cy="20" r="8" fill="%2394a3b8"/><path d="M10 45 C10 35, 40 35, 40 45 Z" fill="%2394a3b8"/></svg>`;
+
+
+const handleImageError = (e) => {
+  e.target.onerror = null;   
+  e.target.src = PLACEHOLDER_AVATAR;
+};
 
 const SearchPage = () => {
   const [filters, setFilters] = useState({
@@ -14,7 +23,6 @@ const SearchPage = () => {
   const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
 
-  // Получаем ID текущего пользователя из localStorage
   useEffect(() => {
     const stored = localStorage.getItem('currentUser');
     if (stored) {
@@ -38,7 +46,6 @@ const SearchPage = () => {
     setError(null);
     setResults([]);
 
-    // Собираем параметры, исключая пустые
     const params = new URLSearchParams();
     if (filters.city.trim()) params.append('city', filters.city.trim());
     if (filters.ageMin) params.append('ageMin', filters.ageMin);
@@ -106,7 +113,7 @@ const SearchPage = () => {
                   value={filters.ageMax}
                   onChange={handleChange}
                   placeholder="До"
-                  min="16"
+                  min="18"
                   max="99"
                 />
               </div>
@@ -147,11 +154,14 @@ const SearchPage = () => {
               <div className="results-grid">
                 {results.map((user) => (
                   <div key={user.id} className="user-card">
+                    
                     <img
-                      src={user.photo ? `/${user.photo}` : '/no-photo.png'}
+                      src={user.photo ? `/${user.photo}` : PLACEHOLDER_AVATAR}
                       alt={user.username}
                       className="user-avatar"
-                      onError={(e) => (e.target.src = '/no-photo.png')}
+                      onError={handleImageError}
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="user-info">
                       <div className="user-name">{user.username}</div>

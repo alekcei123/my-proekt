@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './LoginModal.css';
+import { useNavigate, Link } from 'react-router-dom';
+import './LoginPage.css';
 
-const LoginModal = ({ isOpen, onClose, onLogin }) => {
+const LoginPage = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); 
+  const [password, setPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState('');
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,12 +22,9 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     }
 
     try {
-      // Используем относительный путь через прокси (как в регистрации)
       const response = await fetch('/api/login.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
@@ -36,28 +32,31 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
       if (result.success) {
         setLoginMessage('Успешный вход!');
-        
-        // Получаем полный объект пользователя с бэкенда
-        const userData = result.user; 
-        
-        // Сохраняем пользователя в localStorage (чтобы другие компоненты знали его роль)
-        localStorage.setItem('user', JSON.stringify(userData));
 
-        // Передаем наверх полный объект, а не только email
-        onLogin(userData); 
+        const userData = result.user;
+        const userForStorage = {
+          id: userData.id,
+          email: userData.email,
+          username: userData.username,
+          role: userData.role || 'user',
+          city: userData.city || null,
+          interests: userData.interests || null,
+          is_premium: userData.is_premium === true || userData.is_premium === 1 ? 1 : 0,
+          birth_date: userData.birth_date || null,
+          tariff_level: userData.tariff_level || 0,   // ✅ ДОБАВИЛИ
+        };
 
-        setTimeout(() => {
-          // Динамический редирект в зависимости от роли
-          const role = userData?.role || 'user';
-          
-          if (role === 'developer') {
-            navigate('/developer'); // Панель разработчика
-          } else if (role === 'support') {
-            navigate('/support');   // Панель поддержки
-          } else {
-            navigate('/profile');   // Обычный пользователь
-          }
-        }, 1500);
+        localStorage.setItem('currentUser', JSON.stringify(userForStorage));
+
+       
+        const role = userForStorage.role;
+        if (role === 'developer') {
+          navigate('/developer');
+        } else if (role === 'support') {
+          navigate('/support');
+        } else {
+          navigate(`/profile/${email}`);
+        }
       } else {
         setLoginMessage(result.message || 'Ошибка входа: неверный email или пароль');
       }
@@ -67,19 +66,17 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="modal-overlay">
-      <div className="login-modal">
-        <button className="modal-close" onClick={onClose}>×</button>
+    <div className="login-page-wrapper">
+      <div className="login-card">
         <h2>Вход на сайт</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email:</label>
+            <label htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
+              placeholder="Введите ваш email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -88,10 +85,11 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Пароль:</label>
+            <label htmlFor="password">Пароль</label>
             <input
               type="password"
               id="password"
+              placeholder="Введите пароль"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -102,9 +100,12 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
           {loginMessage && <p className="error-message">{loginMessage}</p>}
           <button type="submit" className="login-btn">Войти</button>
         </form>
+        <p className="register-link">
+          Нет аккаунта? <Link to="/registration">Зарегистрируйтесь</Link>
+        </p>
       </div>
     </div>
   );
 };
 
-export default LoginModal;
+export default LoginPage;

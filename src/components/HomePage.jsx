@@ -14,11 +14,22 @@ const HomePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const total = couplesData.length;
 
-  // Получаем текущего пользователя из localStorage (создано при логине в App.jsx)
   const storedUser = JSON.parse(localStorage.getItem('currentUser'));
   const role = storedUser?.role;
 
-  // Слайдер
+  
+  useEffect(() => {
+    if (!couplesData || couplesData.length === 0) return;
+    
+    couplesData.forEach((couple) => {
+      if (couple.image) {
+        const img = new Image();
+        img.src = couple.image;
+      }
+    });
+  }, []);
+
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % total);
@@ -30,7 +41,6 @@ const HomePage = () => {
   useEffect(() => {
     const loadMatches = async () => {
       try {
-        // Берем ID из объекта пользователя. Если его нет (не залогинен), ставим фолбэк 9.
         const currentUserId = storedUser?.id || 9;
 
         const res = await fetch('/api/get_recommendations.php', {
@@ -44,7 +54,11 @@ const HomePage = () => {
         const data = await res.json();
 
         if (data.status === 'success' && Array.isArray(data.data)) {
-          setMatches(data.data);
+          
+          const filtered = data.data.filter(
+            (u) => u && u.id !== currentUserId
+          );
+          setMatches(filtered);
           setApiError(null);
         } else {
           throw new Error('API вернул неожиданный формат данных');
@@ -58,15 +72,13 @@ const HomePage = () => {
       }
     };
 
-    // Если пользователь поддержки или разработчик, они видят другую главную
     if (role === 'support' || role === 'developer') {
-      return; // Не грузим анкеты
+      return;
     }
     
     loadMatches();
   }, [role, storedUser?.id]);
 
-  // Если это поддержка или разработчик, показываем им заглушку вместо анкет
   if (role === 'support' || role === 'developer') {
     return (
       <main className="home-page-layout">
@@ -95,7 +107,6 @@ const HomePage = () => {
         <h1>Сайт знакомств нового поколения</h1>
         <h2>Мы учли опыт всех сайтов знакомств и создали Donskie Matches.</h2>
         
-        {/* ===== БЛОК НАВИГАЦИИ (ЧАТ + ПОИСК) ===== */}
         <div className="home-nav">
           {storedUser ? (
             <>
@@ -106,17 +117,25 @@ const HomePage = () => {
             <p style={{color: '#f5eded'}}>Войдите, чтобы общаться и искать анкеты.</p>
           )}
         </div>
-        {/* ======================================== */}
 
         <div className="slideshow-container">
           <div className={`slide ${currentIndex === 0 ? 'active' : ''}`}>
             {couple && (
               <div className="story-card">
-                <div className="story-image">
+                <div className="story-image" style={{ position: 'relative', overflow: 'hidden' }}>
                   <img 
                     src={couple.image} 
                     alt={couple.name} 
                     loading="lazy" 
+                    decoding="async"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      objectPosition: 'center',
+                      backgroundColor: '#f1f5f9',
+                      display: 'block'
+                    }}
                     onError={(e) => { e.target.style.display = 'none'; }} 
                   />
                 </div>
@@ -174,8 +193,9 @@ const HomePage = () => {
         ) : matches.length > 0 ? (
           <div className="matches-grid">
             {matches.map((user) => {
-              if (!user) return null;
-              return <UserCard key={user.id || Math.random()} user={user} />;
+              if (!user || !user.id) return null;
+              // ✅ key теперь стабильный — user.id вместо Math.random()
+              return <UserCard key={user.id} user={user} />;
             })}
           </div>
         ) : (
@@ -185,7 +205,6 @@ const HomePage = () => {
         )}
       </section>
 
-      {/* Модальное окно */}
       {isPlaceModalOpen && (
         <div 
           className="modal-overlay" 

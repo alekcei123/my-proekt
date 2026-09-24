@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import LikeButton from './components/LikeButton'; // ✅ импорт кнопки лайка
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import LikeButton from './components/LikeButton';
+import BiorhythmWidget from './components/BiorhythmWidget';
+
+
+const PLACEHOLDER_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" fill="%23e2e8f0"/><circle cx="75" cy="55" r="24" fill="%2394a3b8"/><path d="M25 135 C25 105, 125 105, 125 135 Z" fill="%2394a3b8"/></svg>`;
+
+const handleImageError = (e) => {
+  e.target.onerror = null;
+  e.target.src = PLACEHOLDER_AVATAR;
+};
 
 const UserProfileView = () => {
-  const { userId } = useParams(); 
+  const { userId } = useParams();
+  const navigate = useNavigate();
+
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Текущий пользователь (для проверки, не свой ли профиль)
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const currentUserId = currentUser?.id || null;
-
-  const placeholderSvg = `data:image/svg+xml;utf8,...`; // оставляем ваш placeholder
+  const isPremium = currentUser?.is_premium === 1 || currentUser?.is_premium === true;
 
   useEffect(() => {
     fetch(`/api/get_user_by_id.php?user_id=${userId}`)
@@ -38,29 +47,30 @@ const UserProfileView = () => {
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!userData) return <p>Пользователь не найден</p>;
 
-  const interestsArray = userData.interests 
-    ? userData.interests.split(',').map(i => i.trim()) 
+  const interestsArray = userData.interests
+    ? userData.interests.split(',').map(i => i.trim())
     : [];
 
-  // Проверяем, не свой ли это профиль
   const isOwnProfile = currentUserId === userData.id;
 
   return (
     <div style={{ maxWidth: '700px', margin: '40px auto', padding: '24px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      
+
       {/* Фото */}
       <div style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 20px auto', background: '#f1f5f9', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <img 
-          src={userData.photo ? '/' + userData.photo : placeholderSvg} 
+        <img
+          src={userData.photo ? '/' + userData.photo : PLACEHOLDER_AVATAR}
           alt={userData.username}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          onError={(e) => e.target.src = placeholderSvg}
+          onError={handleImageError}
+          loading="lazy"
+          decoding="async"
         />
       </div>
 
       <h1 style={{ textAlign: 'center' }}>Анкета: {userData.username || 'Пользователь'}</h1>
       <p style={{ textAlign: 'center' }}><strong>Email:</strong> {userData.email}</p>
-      
+
       <div style={{ marginTop: '20px' }}>
         {(userData.city || userData.age) && (
           <p style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
@@ -68,9 +78,9 @@ const UserProfileView = () => {
             {userData.age && <span style={{ background: '#f1f5f9', padding: '4px 10px', borderRadius: '4px' }}>👤 {userData.age} лет</span>}
           </p>
         )}
-        
+
         {userData.gender && <p style={{ textAlign: 'center' }}><strong>Пол:</strong> {userData.gender}</p>}
-        
+
         {interestsArray.length > 0 && (
           <div style={{ margin: '16px 0', textAlign: 'center' }}>
             <strong style={{ display: 'block', marginBottom: '8px' }}>Интересы:</strong>
@@ -94,7 +104,19 @@ const UserProfileView = () => {
         {userData.about && <p style={{ textAlign: 'center' }}><strong>О себе:</strong> {userData.about}</p>}
       </div>
 
-      {/* ===== БЛОК ДЕЙСТВИЙ (ЛАЙК + ЧАТ) ===== */}
+      
+      {!isOwnProfile && (
+        <BiorhythmWidget
+  userBirthDate={userData.birth_date}
+  currentUserBirthDate={currentUser?.birth_date}
+  tariffLevel={currentUser?.tariff_level || 0}
+  userName={userData.username}
+  onUpgrade={() => navigate('/tariffs')}
+/>
+      )}
+      
+
+    
       {currentUserId && !isOwnProfile && (
         <div style={{
           display: 'flex',
@@ -103,7 +125,6 @@ const UserProfileView = () => {
           marginTop: '24px',
           flexWrap: 'wrap'
         }}>
-          {/* Кнопка лайка */}
           <LikeButton
             targetUserId={userData.id}
             currentUserId={currentUserId}
@@ -114,7 +135,6 @@ const UserProfileView = () => {
             }}
           />
 
-          {/* Кнопка "Написать сообщение" */}
           <Link to={`/chat/${userData.id}`} style={{ textDecoration: 'none' }}>
             <button style={{
               padding: '10px 24px',
@@ -153,7 +173,7 @@ const UserProfileView = () => {
           Это ваш профиль. Редактировать анкету можно <Link to="/profile/questionnaire">здесь</Link>.
         </p>
       )}
-      
+
       <p style={{ marginTop: '30px', textAlign: 'center' }}>
         <Link to="/" style={{ color: '#6c757d' }}>← Назад к поиску</Link>
       </p>

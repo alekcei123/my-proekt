@@ -13,7 +13,7 @@ export function TariffDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        // ✅ Используем прокси `/api`
+        
         const response = await fetch('/api/tariffs.php');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -25,7 +25,7 @@ export function TariffDetailPage() {
         const data = JSON.parse(text);
         if (!data.success) throw new Error(data.message || 'Ошибка сервера');
 
-        // Ищем тариф по id в data.data
+        
         const found = data.data?.find(
           (t) => String(t.id) === String(id)
         );

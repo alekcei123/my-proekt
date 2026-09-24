@@ -8,9 +8,11 @@ const QuestionnairePage = () => {
     interests: '',
     about: '',
     gender: 'other',
+    birth_date: '',          // ✅ новое поле
   });
   const [status, setStatus] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,14 +22,17 @@ const QuestionnairePage = () => {
       return;
     }
     const user = JSON.parse(stored);
-    setUserId(user.id); 
+    setUserId(user.id);
+    setUserEmail(user.email);
 
-    // Загружаем существующую анкету (если есть)
     fetch(`/api/get_profile.php?user_id=${user.id}`)
       .then(r => r.json())
       .then(data => {
         if (data.success && data.profile) {
-          setFormData(data.profile);
+          setFormData({
+            ...data.profile,
+            birth_date: data.profile.birth_date || user.birth_date || '',
+          });
         }
       })
       .catch(() => {});
@@ -41,47 +46,67 @@ const QuestionnairePage = () => {
       return;
     }
 
+    // ✅ Валидация даты рождения
+    if (!formData.birth_date) {
+      alert('Укажите дату рождения — она нужна для расчёта биоритмов');
+      return;
+    }
+    const bd = new Date(formData.birth_date);
+    if (bd > new Date()) {
+      alert('Дата рождения не может быть в будущем');
+      return;
+    }
+
     const payload = {
-      user_id: userId, // ✅ теперь реальный ID
+      user_id: userId,
       city: formData.city,
       age: parseInt(formData.age) || 0,
       interests: formData.interests,
       about: formData.about,
       gender: formData.gender,
+      birth_date: formData.birth_date,
     };
 
     setStatus('saving');
 
     try {
-      // ✅ Используем прокси
       const res = await fetch('/api/save_profile.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok || !data.success) {
         console.error('Server error:', data);
-        alert('Ошибка: ' + (data.debug_message || data.error || 'Неизвестная ошибка'));
+        alert('Ошибка: ' + (data.debug_message || data.error || data.message || 'Неизвестная ошибка'));
         setStatus(null);
         return;
       }
 
-      console.log('Success:', data);
+      
+      const updatedUser = {
+        ...JSON.parse(localStorage.getItem('currentUser') || '{}'),
+        birth_date: formData.birth_date,
+      };
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
       alert('Анкета сохранена!');
       setStatus(null);
-      // Можно перенаправить на профиль
-      navigate('/profile');
+
+      if (userEmail) {
+        navigate(`/profile/${userEmail}`);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
-      alert('Ошибка сети: проверь, запущен ли XAMPP и доступен ли localhost');
+      alert('Ошибка сети. Проверьте подключение к серверу.');
       setStatus(null);
     }
   };
+
+  
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
@@ -107,10 +132,26 @@ const QuestionnairePage = () => {
             value={formData.age}
             onChange={(e) => setFormData(prev => ({ ...prev, age: Number(e.target.value) }))}
             style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-            min="13"
-            max="120"
+            min="18"
+            max="99"
             required
           />
+        </div>
+
+        
+        <div style={{ marginBottom: '12px' }}>
+          <label>Дата рождения *</label>
+          <input
+            type="date"
+            required
+            value={formData.birth_date || ''}
+            onChange={(e) => setFormData(prev => ({ ...prev, birth_date: e.target.value }))}
+            max={todayStr}
+            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+          />
+          <small style={{ color: '#64748b', fontSize: 12 }}>
+            Нужна для расчёта биоритмов и резонанса
+          </small>
         </div>
 
         <div style={{ marginBottom: '12px' }}>
@@ -149,7 +190,7 @@ const QuestionnairePage = () => {
         <button
           type="submit"
           disabled={status === 'saving'}
-          style={{ padding: '10px 20px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}
+          style={{ padding: '10px 20px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
         >
           {status === 'saving' ? 'Сохраняем...' : 'Сохранить'}
         </button>

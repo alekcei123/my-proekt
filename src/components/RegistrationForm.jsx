@@ -8,50 +8,105 @@ function RegistrationForm() {
     password: '',
     confirmPassword: '',
     city: '',
-    gender: 'male',
+    gender: '',
     age: '',
     education: '',
     interests: '',
-    about: ''
+    about: '',
+    birth_date: '',   // ✅ новое поле
   });
   const [registrationMessage, setRegistrationMessage] = useState('');
   const [previewImages, setPreviewImages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [honeypot, setHoneypot] = useState('');
-  // Состояние для чекбокса
   const [agreement, setAgreement] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    setSelectedFiles(files);
-    const imagePreviews = files.map(file => URL.createObjectURL(file));
-    setPreviewImages(imagePreviews);
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+    const maxFileSize = 5 * 1024 * 1024;
+    const maxFiles = 5;
+
+    const validFiles = [];
+    const errors = [];
+
+    for (const file of files) {
+      if (!allowedMimeTypes.includes(file.type)) {
+        errors.push(`«${file.name}» — недопустимый формат. Разрешены только JPG, PNG, WEBP.`);
+        continue;
+      }
+
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedExtensions.includes(ext)) {
+        errors.push(`«${file.name}» — расширение .${ext} не поддерживается.`);
+        continue;
+      }
+
+      if (file.size > maxFileSize) {
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        errors.push(`«${file.name}» — файл ${sizeMb} МБ, максимум 5 МБ.`);
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > maxFiles) {
+      errors.push(`Можно загрузить не более ${maxFiles} фото.`);
+      setRegistrationMessage(errors.join('\n'));
+      return;
+    }
+
+    if (errors.length > 0) {
+      setRegistrationMessage(errors.join('\n'));
+      return;
+    }
+
+    setRegistrationMessage('');
+    setSelectedFiles(validFiles);
+    setPreviewImages(validFiles.map(file => URL.createObjectURL(file)));
+  };
+
+  const handleRemovePhoto = (index) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    const newPreviews = previewImages.filter((_, i) => i !== index);
+    setSelectedFiles(newFiles);
+    setPreviewImages(newPreviews);
+  };
+
+  // ✅ Хелпер: считает возраст по дате рождения
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // --- АНТИСПАМ ---
     if (honeypot) {
       setRegistrationMessage('Ваша заявка отклонена антиспам-системой.');
       return;
     }
 
-    // --- Проверка согласия ---
     if (!agreement) {
       setRegistrationMessage('Для регистрации необходимо согласие на обработку персональных данных');
       return;
     }
 
-    // --- ВАЛИДАЦИЯ ---
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setRegistrationMessage('Пожалуйста, введите корректный email');
@@ -73,14 +128,32 @@ function RegistrationForm() {
       setRegistrationMessage('Заполните все обязательные поля');
       return;
     }
+
     const ageNum = parseInt(formData.age, 10);
     if (isNaN(ageNum) || ageNum < 18 || ageNum > 99) {
       setRegistrationMessage('Возраст должен быть числом от 18 до 99');
       return;
     }
 
+    // ✅ ВАЛИДАЦИЯ ДАТЫ РОЖДЕНИЯ
+    if (!formData.birth_date) {
+      setRegistrationMessage('Укажите дату рождения — она нужна для расчёта биоритмов');
+      return;
+    }
+    const birthDate = new Date(formData.birth_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (birthDate > today) {
+      setRegistrationMessage('Дата рождения не может быть в будущем');
+      return;
+    }
+    const ageFromBirth = calculateAge(formData.birth_date);
+    if (ageFromBirth === null || ageFromBirth < 18) {
+      setRegistrationMessage('Регистрация доступна с 18 лет');
+      return;
+    }
+
     try {
-      // Создаем FormData (вместо JSON)!
       const formDataToSend = new FormData();
       formDataToSend.append('username', formData.username.trim());
       formDataToSend.append('email', formData.email.trim());
@@ -91,20 +164,18 @@ function RegistrationForm() {
       formDataToSend.append('education', formData.education.trim());
       formDataToSend.append('interests', formData.interests.trim());
       formDataToSend.append('about', formData.about.trim());
-      // Передаем согласие на сервер
       formDataToSend.append('agreement', agreement ? '1' : '0');
+      formDataToSend.append('birth_date', formData.birth_date);   // ✅ отправляем дату
 
-      // Добавляем файлы (фото) прямо в этот же FormData
       if (selectedFiles.length > 0) {
         selectedFiles.forEach((file) => {
           formDataToSend.append('photos[]', file);
         });
       }
 
-      // Отправляем ОДИН запрос в register.php (без заголовка Content-Type!)
       const response = await fetch('/api/register.php', {
         method: 'POST',
-        body: formDataToSend, 
+        body: formDataToSend,
       });
 
       const data = await response.json().catch(() => ({
@@ -112,38 +183,45 @@ function RegistrationForm() {
         message: 'Не удалось прочитать ответ сервера (невалидный JSON)'
       }));
 
+      console.log('Ответ регистрации:', data);
+
       if (!data.success) {
         setRegistrationMessage(data.message || 'Ошибка регистрации');
         return;
       }
 
-      // Успешное завершение
-      localStorage.setItem('authToken', data.token);
-      setRegistrationMessage('');
-      alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
+      if (!data.user || !data.user.email) {
+        setRegistrationMessage('Ошибка: сервер не вернул данные пользователя. Проверьте register.php.');
+        return;
+      }
 
-      // Очистка формы
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        city: '',
-        gender: 'male',
-        age: '',
-        education: '',
-        interests: '',
-        about: ''
-      });
-      setAgreement(false);
-      setPreviewImages([]);
-      setSelectedFiles([]);
+      
+      const userForStorage = {
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.username,
+        role: data.user.role || 'user',
+        city: data.user.city || null,
+        is_premium: data.user.is_premium === true || data.user.is_premium === 1 ? 1 : 0,
+        tariff_level: data.user.tariff_level || 0,
+        birth_date: data.user.birth_date || formData.birth_date || null,
+      };
+
+      localStorage.setItem('currentUser', JSON.stringify(userForStorage));
+      setRegistrationMessage('');
+
+      alert(`🎉 Регистрация успешна! Добро пожаловать, ${data.user.username || formData.username}!`);
+
+      window.location.href = `/profile/${data.user.email}`;
 
     } catch (error) {
       console.error('Ошибка сети (fetch):', error);
-      setRegistrationMessage('Не удалось подключиться к серверу. Проверьте, запущен ли XAMPP и работает ли Apache.');
+      setRegistrationMessage('Не удалось подключиться к серверу. Проверьте соединение.');
     }
   };
+
+  
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="registration-form-container">
@@ -157,108 +235,88 @@ function RegistrationForm() {
           onChange={(e) => setHoneypot(e.target.value)}
         />
 
-        {/* Остальные поля */}
         <div className="form-group">
           <label htmlFor="username">Имя пользователя *</label>
           <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="Введите имя пользователя"
-            required
+            type="text" id="username" name="username"
+            value={formData.username} onChange={handleChange}
+            placeholder="Введите имя пользователя" required
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="email">Email *</label>
           <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@mail.ru"
-            required
+            type="email" id="email" name="email"
+            value={formData.email} onChange={handleChange}
+            placeholder="example@mail.ru" required
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="password">Пароль *</label>
           <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Минимум 8 символов, цифра и буква"
-            required
+            type="password" id="password" name="password"
+            value={formData.password} onChange={handleChange}
+            placeholder="Минимум 8 символов, цифра и буква" required
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="confirmPassword">Подтвердите пароль *</label>
           <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
+            type="password" id="confirmPassword" name="confirmPassword"
+            value={formData.confirmPassword} onChange={handleChange} required
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="city">Город *</label>
           <input
-            type="text"
-            id="city"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            placeholder="Ваш город"
-            required
+            type="text" id="city" name="city"
+            value={formData.city} onChange={handleChange}
+            placeholder="Ваш город" required
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="gender">Пол *</label>
-          <select
-            id="gender"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            required
-          >
+          <select id="gender" name="gender" value={formData.gender} onChange={handleChange} required>
+            <option value="">-- Выберите пол --</option>
             <option value="male">Мужской</option>
             <option value="female">Женский</option>
-            <option value="other">Другой</option>
           </select>
         </div>
 
         <div className="form-group">
           <label htmlFor="age">Возраст *</label>
           <input
-            type="number"
-            id="age"
-            name="age"
-            value={formData.age}
+            type="number" id="age" name="age"
+            value={formData.age} onChange={handleChange}
+            min="18" max="99" required
+          />
+        </div>
+
+        
+        <div className="form-group">
+          <label htmlFor="birth_date">Дата рождения *</label>
+          <input
+            type="date"
+            id="birth_date"
+            name="birth_date"
+            value={formData.birth_date}
             onChange={handleChange}
-            min="18"
-            max="99"
+            max={todayStr}
             required
           />
+          <p className="hint" style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+            Нужно для расчёта биоритмов и резонанса с другими людьми
+          </p>
         </div>
 
         <div className="form-group">
           <label htmlFor="education">Образование</label>
-          <select
-            id="education"
-            name="education"
-            value={formData.education}
-            onChange={handleChange}
-          >
+          <select id="education" name="education" value={formData.education} onChange={handleChange}>
             <option value="">Выберите</option>
             <option value="Среднее">Среднее</option>
             <option value="Среднее специальное">Среднее специальное</option>
@@ -271,11 +329,8 @@ function RegistrationForm() {
         <div className="form-group">
           <label htmlFor="interests">Интересы</label>
           <input
-            type="text"
-            id="interests"
-            name="interests"
-            value={formData.interests}
-            onChange={handleChange}
+            type="text" id="interests" name="interests"
+            value={formData.interests} onChange={handleChange}
             placeholder="Например: путешествия, кино, спорт"
           />
         </div>
@@ -283,36 +338,29 @@ function RegistrationForm() {
         <div className="form-group">
           <label htmlFor="about">О себе</label>
           <textarea
-            id="about"
-            name="about"
-            value={formData.about}
-            onChange={handleChange}
-            placeholder="Расскажите немного о себе"
-            rows="4"
+            id="about" name="about"
+            value={formData.about} onChange={handleChange}
+            placeholder="Расскажите немного о себе" rows="4"
           />
         </div>
 
         <div className="form-group">
           <label htmlFor="photos">Загрузите фото</label>
           <input
-            type="file"
-            id="photos"
-            name="photos"
-            accept="image/*"
-            multiple
-            onChange={handleFileChange}
+            type="file" id="photos" name="photos"
+            accept=".jpg,.jpeg,.png,.webp"
+            multiple onChange={handleFileChange}
           />
-          <p className="hint">Можно загрузить несколько фото (JPG, PNG, WEBP)</p>
+          <p className="hint">
+            Только JPG, PNG, WEBP. Максимум 5 фото, до 5 МБ каждое.
+          </p>
         </div>
 
-        {/* Чекбокс согласия */}
         <div className="form-group">
           <label className="checkbox-label">
             <input
-              type="checkbox"
-              checked={agreement}
-              onChange={(e) => setAgreement(e.target.checked)}
-              required
+              type="checkbox" checked={agreement}
+              onChange={(e) => setAgreement(e.target.checked)} required
             />
             <span> Я согласен на обработку персональных данных</span>
           </label>
@@ -320,11 +368,20 @@ function RegistrationForm() {
 
         {previewImages.length > 0 && (
           <div className="gallery">
-            <h4>Ваши фото:</h4>
+            <h4>Ваши фото</h4>
             <div className="gallery-grid">
               {previewImages.map((preview, index) => (
                 <div key={index} className="gallery-item">
-                  <img src={preview} alt={`Preview ${index + 1}`} />
+                  <img src={preview} alt={`Фото ${index + 1}`} />
+                  <span className="photo-number">{index + 1}</span>
+                  <button
+                    type="button"
+                    className="remove-btn"
+                    onClick={() => handleRemovePhoto(index)}
+                    title="Удалить фото"
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
@@ -333,7 +390,11 @@ function RegistrationForm() {
 
         <button type="submit" className="submit-btn">Зарегистрироваться</button>
       </form>
-      {registrationMessage && <p className="error-message">{registrationMessage}</p>}
+      {registrationMessage && (
+        <p className="error-message" style={{ whiteSpace: 'pre-line' }}>
+          {registrationMessage}
+        </p>
+      )}
       <p className="required-info">* Обязательные поля</p>
     </div>
   );
