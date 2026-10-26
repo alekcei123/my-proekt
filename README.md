@@ -1,16 +1,27 @@
-# React + Vite
+# React + Vite# [Название проекта:  Client Dashboard]
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение с клиентской частью на React и серверной логикой на PHP (авторизация, регистрация, тарифы).
 
-Currently, two official plugins are available:
+## Стек технологий
+* **Frontend:** React, Vite, JavaScript, CSS (Grid/Flexbox), HTML5
+* **Backend:** PHP (авторизация, регистрация, обработка тарифов)
+* **Сборка и качество кода:** Vite
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Что реализовано
+ Адаптивная вёрстка (мобильные устройства и планшеты).
+ Интеграция REST API: авторизация по JWT, получение данных профиля.
+  Настроена сборка проекта на Vite для быстрой разработки.
+  
 
-## React Compiler
+## Что я сделал лично
+ Разработал клиентскую часть (React-компоненты).
+ Настроил сборку, линтеры и форматирование кода.
+ Реализовал взаимодействие с серверной частью (PHP) через REST API.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Как запустить локально
+1. Установить зависимости: `npm install`
+2. Запустить проект: `npm run dev`
+3. Запустить базу данных    [`php -S localhost:8000`]
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Ссылки
+* **Мой профиль:** https://rostov.hh.ru/resume/d4f0f756ff0bd758a20039ed1f465147654946?hhtmFrom=resume
